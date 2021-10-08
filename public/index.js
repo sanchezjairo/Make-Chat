@@ -19,14 +19,15 @@ $(document).ready(()=>{
 
   $('#send-chat-btn').click((e) => {
     e.preventDefault();
-    // Get the message text value
+    // Get the client's channel
+    let channel = $('.channel-current').text();
     let message = $('#chat-input').val();
-    // Make sure it's not empty
-    if(message.length > 0){
-      // Emit the message with the current user to the server
+    if(message.length > 0) {
       socket.emit('new message', {
         sender : currentUser,
         message : message,
+        //Send the channel over to the server
+        channel : channel
       });
       $('#chat-input').val("");
     }
