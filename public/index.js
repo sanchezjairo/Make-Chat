@@ -1,10 +1,17 @@
 //index.js
-$(document).ready(()=>{
-  const socket = io.connect();
+$(document).ready(() => {
 
-  //Keep track of the current user
+  const socket = io.connect();
   let currentUser;
-  socket.emit('get online users')
+  socket.emit('get online users');
+  //Each user should be in the general channel by default.
+  socket.emit('user changed channel', "General");
+
+  //Users can change the channel by clicking on its name.
+  $(document).on('click', '.channel', (e)=>{
+    let newChannel = e.target.textContent;
+    socket.emit('user changed channel', newChannel);
+  });
 
   $('#create-user-btn').click((e)=>{
     e.preventDefault();
@@ -51,12 +58,17 @@ $(document).ready(()=>{
 
   //Output the new message
   socket.on('new message', (data) => {
-    $('.message-container').append(`
-      <div class="message">
-        <p class="message-user">${data.sender}: </p>
-        <p class="message-text">${data.message}</p>
-      </div>
-  `);
+    //Only append the message if the user is currently in that channel
+    let currentChannel = $('.channel-current').text();
+    if(currentChannel == data.channel) {
+      $('.message-container').append(`
+        <div class="message">
+          <p class="message-user">${data.sender}: </p>
+          <p class="message-text">${data.message}</p>
+        </div>
+      `);
+    }
+  });
 
   socket.on('get online users', (onlineUsers) => {
     //You may have not have seen this for loop before. It's syntax is for(key in obj)
@@ -95,4 +107,3 @@ socket.on('user changed channel', (data) => {
     `);
   });
 });
-})
